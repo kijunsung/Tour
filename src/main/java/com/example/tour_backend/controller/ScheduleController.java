@@ -1,8 +1,12 @@
 package com.example.tour_backend.controller;
 
 import com.example.tour_backend.domain.schedule.Schedule;
+import com.example.tour_backend.domain.tour.Tour;
 import com.example.tour_backend.domain.tour.TourRepository;
 import com.example.tour_backend.domain.schedule.ScheduleRepository;
+import com.example.tour_backend.dto.schedule.ScheduleDto;
+import com.example.tour_backend.service.ScheduleService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +21,7 @@ import java.util.List;
 public class ScheduleController {
     private final ScheduleRepository scheduleRepository;
     private final TourRepository tourRepository;
+    private final ScheduleService scheduleService;
 
     @GetMapping
     public List<Schedule> getAll() {
@@ -31,11 +36,22 @@ public class ScheduleController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Schedule create(@RequestBody Schedule schedule) {
-        Timestamp now = new Timestamp(System.currentTimeMillis());
-        schedule.setCreateDate(now.toLocalDateTime());
-        schedule.setModifiedDate(now.toLocalDateTime());
-        return scheduleRepository.save(schedule);
+    public ScheduleDto create(@RequestBody ScheduleDto dto) {
+        Tour tour = tourRepository.findById(dto.getTourId())
+                .orElseThrow(() -> new EntityNotFoundException("여행 정보가 없습니다."));
+        Schedule schedule = Schedule.builder()
+                .tour(tour)
+                .scheduleTitle(dto.getScheduleTitle())
+                .content(dto.getContent())
+                .date(dto.getDate())
+                .startTime(dto.getStartTime())
+                .endTime(dto.getEndTime())
+                .build();
+        Schedule saved = scheduleRepository.save(schedule);
+        dto.setScheduleId(saved.getScheduleId());
+        dto.setCreateDate(saved.getCreateDate());
+        dto.setModifiedDate(saved.getModifiedDate());
+        return dto;
     }
 
     @PutMapping("/{id}")

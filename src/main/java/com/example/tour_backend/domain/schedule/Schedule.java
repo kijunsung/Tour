@@ -48,8 +48,8 @@ public class Schedule {
     @UpdateTimestamp
     private LocalDateTime modifiedDate;
 
-    @OneToMany(mappedBy = "schedule")
-    private List<MapEntity> maps;
+//    @OneToMany(mappedBy = "schedule")
+//    private List<MapEntity> maps;
 
     @Builder
     public Schedule(Tour tour, String scheduleTitle, String content,

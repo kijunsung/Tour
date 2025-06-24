@@ -1,9 +1,6 @@
 package com.example.tour_backend.dto.schedule;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.sql.Date;
 import java.sql.Time;

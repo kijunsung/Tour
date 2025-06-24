@@ -49,8 +49,8 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-
-
+	//HateOAS
+	implementation 'org.springframework.boot:spring-boot-starter-hateoas'
 
 
 //	// Map
