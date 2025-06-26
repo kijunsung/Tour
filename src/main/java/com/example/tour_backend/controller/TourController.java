@@ -5,6 +5,7 @@ import com.example.tour_backend.domain.user.User;
 import com.example.tour_backend.domain.tour.TourRepository;
 import com.example.tour_backend.domain.user.UserRepository;
 import com.example.tour_backend.dto.tour.TourDto;
+import com.example.tour_backend.service.TourService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -22,17 +23,20 @@ import java.util.List;
 public class TourController {
     private final TourRepository tourRepository;
     private final UserRepository userRepository;
+    private final TourService tourService;
 
+    /** (1) 전체 조회는 기존처럼 */
     @GetMapping
     public List<Tour> getAll() {
         return tourRepository.findAll();
     }
 
+    /** (2) 한 건 조회: schedules 를 함께 fetch 하는 findWithSchedulesByTourId 사용 */
     @GetMapping("/{id}")
-    public Tour getById(@PathVariable Long id) {
-        return tourRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tour not found"));
+    public TourDto getById(@PathVariable Long id) {
+        return tourService.getTour(id);      // ★ DTO로 반환
     }
+
 
 //    @PostMapping
 //    @ResponseStatus(HttpStatus.CREATED)

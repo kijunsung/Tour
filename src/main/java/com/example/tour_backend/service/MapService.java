@@ -1,6 +1,6 @@
 package com.example.tour_backend.service;
 
-import com.example.tour_backend.domain.mapentity.MapEntity;
+import com.example.tour_backend.domain.mapentity.Map;
 import com.example.tour_backend.domain.mapentity.MapRepository;
 import com.example.tour_backend.domain.schedule.Schedule;
 import com.example.tour_backend.domain.schedule.ScheduleRepository;
@@ -25,7 +25,7 @@ public class MapService {
         Schedule schedule = scheduleRepository.findById(dto.getScheduleId())
                 .orElseThrow(() -> new RuntimeException("일정 정보가 존재하지 않습니다."));
 
-        MapEntity map = MapEntity.builder()
+        Map map = Map.builder()
                 .schedule(schedule)
                 .tour(schedule.getTour())
                 .location(dto.getLocation())

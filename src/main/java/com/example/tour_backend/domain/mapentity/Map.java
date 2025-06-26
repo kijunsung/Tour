@@ -7,11 +7,11 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "mapentity")
+@Table(name = "maps")
 @NoArgsConstructor
 @Getter
 @Setter
-public class MapEntity {
+public class Map {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long mapId;
@@ -31,7 +31,7 @@ public class MapEntity {
     private LocalDateTime createDate;
 
     @Builder
-    public MapEntity(Schedule schedule, Tour tour, String location, LocalDateTime createDate) {
+    public Map(Schedule schedule, Tour tour, String location, LocalDateTime createDate) {
         this.schedule = schedule;
         this.tour = tour;
         this.location = location;

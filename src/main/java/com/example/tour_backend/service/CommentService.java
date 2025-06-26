@@ -9,6 +9,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class CommentService {
@@ -16,7 +20,8 @@ public class CommentService {
     private final ThreadRepository threadRepository;
 
     @Transactional
-    public CommentDto addComment(CommentDto dto) {
+    public CommentDto createComment(CommentDto dto) {
+        // 1) 요청 DTO에 담긴 threadId로 Thread 엔티티 조회
         Thread thread = threadRepository.findById(dto.getThreadId())
                 .orElseThrow(() -> new RuntimeException("게시물이 존재하지 않습니다."));
 
@@ -26,12 +31,41 @@ public class CommentService {
                 .author(dto.getAuthor())
                 .build();
 
-        commentRepository.save(comment);
+        Comment saved = commentRepository.save(comment);
 
-        dto.setCommentId(comment.getCommentId());
-        dto.setCreateDate(comment.getCreateDate());
-        dto.setModifiedDate(comment.getModifiedDate());
+        return toDto(saved);
+    }
 
-        return dto;
+    /**
+     * 전체 댓글 조회
+     */
+    @Transactional(readOnly = true)
+    public List<CommentDto> getAllComments() {
+        return commentRepository.findAll().stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 단일 댓글 조회
+     */
+    @Transactional(readOnly = true)
+    public Optional<CommentDto> getComment(Long commentId) {
+        return commentRepository.findById(commentId)
+                .map(this::toDto);
+    }
+
+    /**
+     * Comment 엔티티를 CommentDto로 변환
+     */
+    private CommentDto toDto(Comment c) {
+        return CommentDto.builder()
+                .commentId(c.getCommentId())
+                .threadId(c.getThread().getThreadId())
+                .comment(c.getComment())
+                .author(c.getAuthor())
+                .createDate(c.getCreateDate())
+                .modifiedDate(c.getModifiedDate())
+                .build();
     }
 }

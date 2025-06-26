@@ -4,11 +4,14 @@ import com.example.tour_backend.domain.thread.Thread;
 import com.example.tour_backend.domain.thread.ThreadRepository;
 import com.example.tour_backend.domain.user.User;
 import com.example.tour_backend.domain.user.UserRepository;
+import com.example.tour_backend.dto.comment.CommentDto;
 import com.example.tour_backend.dto.thread.ThreadDto;
+import com.example.tour_backend.dto.thread.ThreadUpdateRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,7 +22,7 @@ public class ThreadService {
     private final ThreadRepository threadRepository;
     private final UserRepository userRepository;
 
-    @Transactional
+    @Transactional //게시글 생성
     public ThreadDto createThread(ThreadDto dto) {
         User user = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자입니다."));
@@ -45,8 +48,8 @@ public class ThreadService {
         return dto;
     }
 
-    public Optional<ThreadDto> getThread(Long threadid) {
-        return threadRepository.findById(threadid)
+    public Optional<ThreadDto> getThread(Long threadId) { //게시글 하나 조회
+        return threadRepository.findById(threadId)
                 .map(thread -> {
                     ThreadDto dto = new ThreadDto();
                     dto.setThreadId(thread.getThreadId());
@@ -65,7 +68,7 @@ public class ThreadService {
                 });
     }
 
-    public List<ThreadDto> getAllThreads() {
+    public List<ThreadDto> getAllThreads() { //모든 게시글 목록 조회
         return threadRepository.findAll().stream()
                 .map(thread -> {
                     ThreadDto dto = new ThreadDto();
@@ -81,8 +84,74 @@ public class ThreadService {
                     dto.setArea(thread.getArea());
                     dto.setCreateDate(thread.getCreateDate());
                     dto.setModifiedDate(thread.getModifiedDate());
+
+                    // 🔥 댓글 목록을 DTO로 변환
+                    if (thread.getComments() != null) {
+                        List<CommentDto> commentDtos = thread.getComments().stream()
+                                .map(c -> {
+                                    CommentDto cdto = new CommentDto();
+                                    cdto.setCommentId(c.getCommentId());
+                                    cdto.setThreadId(thread.getThreadId());
+                                    cdto.setAuthor(c.getAuthor());
+                                    cdto.setComment(c.getComment());
+                                    cdto.setCreateDate(c.getCreateDate());
+                                    cdto.setModifiedDate(c.getModifiedDate());
+                                    return cdto;
+                                })
+                                .collect(Collectors.toList());
+                        dto.setComments(commentDtos);
+                    }
                     return dto;
                 })
                 .collect(Collectors.toList());
     }
+
+    @Transactional // 게시글 삭제 (추추추가)
+    public void deleteThread(Long id) {
+        Thread thread = threadRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다."));
+        threadRepository.delete(thread);
+    }
+
+    @Transactional // 게시글 수정
+    // 추추가 (메서드 게시글 수정위해 추가
+    public Thread updateThread(Long id, ThreadUpdateRequestDto dto) {
+        Thread thread = threadRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다."));
+
+        // 수정 가능 필드만 변경
+        thread.setTitle(dto.getTitle());
+        thread.setContent(dto.getContent());
+        thread.setAuthor(dto.getAuthor());
+        thread.setPdfPath(dto.getPdfPath());
+        thread.setArea(dto.getArea());
+        thread.setModifiedDate(LocalDateTime.now());
+
+        return threadRepository.save(thread);
+    }
+
+    // 게시물 검색 기능 추추추추가
+    @Transactional(readOnly = true)
+    public List<ThreadDto> searchThreads(String keyword) {
+        List<Thread> threads = threadRepository.findByTitleContainingOrContentContaining(keyword, keyword);
+
+        return threads.stream().map(thread -> {
+            ThreadDto dto = new ThreadDto();
+            // dto 필드 세팅
+            dto.setThreadId(thread.getThreadId());
+            dto.setUserId(thread.getUser().getUserId());
+            dto.setTitle(thread.getTitle());
+            dto.setContent(thread.getContent());
+            dto.setAuthor(thread.getAuthor());
+            dto.setCount(thread.getCount());
+            dto.setHeart(thread.getHeart());
+            dto.setPdfPath(thread.getPdfPath());
+            dto.setCommentCount(thread.getCommentCount());
+            dto.setArea(thread.getArea());
+            dto.setCreateDate(thread.getCreateDate());
+            dto.setModifiedDate(thread.getModifiedDate());
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
 }

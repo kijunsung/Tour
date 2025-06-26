@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface MapRepository extends JpaRepository<MapEntity, Long> {
+public interface MapRepository extends JpaRepository<Map, Long> {
     // scheduleId에 해당하는 Map(코스) 목록을 모두 가져오는 메서드
-    List<MapEntity> findByScheduleScheduleId(Long scheduleId);
+    List<Map> findByScheduleScheduleId(Long scheduleId);
 }

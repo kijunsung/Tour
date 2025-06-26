@@ -1,5 +1,6 @@
 package com.example.tour_backend.domain.comment;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -20,6 +21,7 @@ public class Comment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "threadId", nullable = false)
+    @JsonIgnore // 순환 참조 방지
     private Thread thread;
 
     @Lob

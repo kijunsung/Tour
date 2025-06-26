@@ -3,21 +3,32 @@ package com.example.tour_backend.controller;
 import com.example.tour_backend.dto.comment.CommentDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.example.tour_backend.service.CommentService;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/comments")
+@RequestMapping("/api/comments")
 @RequiredArgsConstructor
 public class CommentController {
     private final CommentService commentService;
 
     @PostMapping
-    public ResponseEntity<CommentDto> addComment(@RequestBody CommentDto dto) {
-        CommentDto result = commentService.addComment(dto);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<CommentDto> createComment(@RequestBody CommentDto dto) {
+        CommentDto created = commentService.createComment(dto);
+        return ResponseEntity.ok(created);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<CommentDto>> getAllComments() {
+        return ResponseEntity.ok(commentService.getAllComments());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<CommentDto> getComment(@PathVariable Long id) {
+        return commentService.getComment(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 }

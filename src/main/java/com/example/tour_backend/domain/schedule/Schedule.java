@@ -1,7 +1,7 @@
 package com.example.tour_backend.domain.schedule;
 
-import com.example.tour_backend.domain.mapentity.MapEntity;
 import com.example.tour_backend.domain.tour.Tour;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -9,10 +9,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.sql.Date;
 import java.sql.Time;
 
-
-
 import java.time.LocalDateTime;
-import java.util.List;
 
 
 @Entity
@@ -25,8 +22,11 @@ public class Schedule {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long scheduleId;
 
-    @ManyToOne
+
+    // ⚠️ Tour 쪽에서 @JsonManagedReference 를 걸었으니 여기엔 @JsonBackReference 를 달아 줍니다
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tourId", nullable = false)
+    @JsonBackReference
     private Tour tour;
 
     @Column(nullable = false, length = 225)

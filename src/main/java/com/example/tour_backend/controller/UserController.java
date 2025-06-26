@@ -1,9 +1,6 @@
 package com.example.tour_backend.controller;
 
-import com.example.tour_backend.dto.user.JwtResponse;
-import com.example.tour_backend.dto.user.LoginRequestDto;
-import com.example.tour_backend.dto.user.UserRequestDto;
-import com.example.tour_backend.dto.user.UserResponseDto;
+import com.example.tour_backend.dto.user.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -48,9 +45,52 @@ public class UserController {
         }
     }
 
+    // 회원정보 수정 추가
+    @PutMapping("/{userId}")
+    public ResponseEntity<UserResponseDto> updateUser(
+            @PathVariable Long userId,
+            @RequestBody UserUpdateRequestDto updateRequest
+    ) {
+        try {
+            UserResponseDto updatedUser = userService.updateUser(userId, updateRequest);
+            return ResponseEntity.ok(updatedUser);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+
     @GetMapping
     public ResponseEntity<List<UserResponseDto>> getAllUsers() {
         List<UserResponseDto> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
     }
+
+//    @GetMapping("/username/{username}")
+//    public ResponseEntity<Long> getUserIdByUsername(@PathVariable String username) {
+//        Long userId = userService.findUserIdByUsername(username);  // username으로 userId 찾기
+//        if (userId != null) {
+//            return ResponseEntity.ok(userId);  // userId가 존재하면 반환
+//        } else {
+//            return ResponseEntity.status(404).body(null);  // userId가 없으면 404 반환
+//        }
+//    }
+
+    @GetMapping("/username/{username}")
+    public ResponseEntity<Long> getUserIdByUsername(@PathVariable String username) {
+        try {
+            Long userId = userService.findUserIdByUsername(username);
+            if (userId != null) {
+                return ResponseEntity.ok(userId);
+            } else {
+                return ResponseEntity.status(404).body(null); // username 없을 때
+            }
+        } catch (Exception e) {
+            // 예외 로그 찍고 500 응답
+            System.err.println("Error while fetching userId by username: " + e.getMessage());
+            return ResponseEntity.status(500).body(null);
+        }
+    }
 }
+
+

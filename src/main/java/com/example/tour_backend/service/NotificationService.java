@@ -13,67 +13,68 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
     private final NotificationRepository notificationRepository;
-    private final UserRepository userRepository;
-    private final ThreadRepository threadRepository;
-    private final CommentRepository commentRepository;
+    private final UserRepository         userRepository;
+    private final ThreadRepository       threadRepository;
+    private final CommentRepository      commentRepository;
 
+    /**
+     * 알림 생성
+     */
     @Transactional
-    public NotificationDto createNotification(Long userId, Long threadId, Long commentId, String message) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("사용자가 존재하지 않습니다."));
-        Thread thread = threadRepository.findById(threadId)
-                .orElseThrow(() -> new RuntimeException("게시물이 존재하지 않습니다."));
-        Comment comment = null;
-        if (commentId != null) {
-            comment = commentRepository.findById(commentId)
-                    .orElseThrow(() -> new RuntimeException("댓글이 존재하지 않습니다."));
-        }
+    public NotificationDto createNotification(NotificationDto dto) {
+        // 1) 연관 엔티티 조회 및 예외 처리
+        User    user    = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new RuntimeException("해당 유저가 없습니다."));
+        Thread  thread  = threadRepository.findById(dto.getThreadId())
+                .orElseThrow(() -> new RuntimeException("해당 게시글이 없습니다."));
+        Comment comment = commentRepository.findById(dto.getCommentId())
+                .orElseThrow(() -> new RuntimeException("해당 댓글이 없습니다."));
 
-        Notification notification = Notification.builder()
-                .user(user)
-                .thread(thread)
-                .comment(comment)
-                .message(message)
-                .isRead(false)
+        // 2) Notification 엔티티 생성 및 저장
+        Notification saved = notificationRepository.save(
+                Notification.builder()
+                        .user(user)
+                        .thread(thread)
+                        .comment(comment)
+                        .message(dto.getMessage())
+                        .isRead(dto.isRead())
+                        .createDate(LocalDateTime.now())   // Builder 에 createDate 필드가 필요하다면 명시
+                        .build()
+        );
+
+        // 3) 저장된 엔티티를 DTO로 변환해 반환
+        return NotificationDto.builder()
+                .noticeId(   saved.getNoticeId()        )
+                .userId(     saved.getUser().getUserId())
+                .threadId(   saved.getThread().getThreadId())
+                .commentId(  saved.getComment().getCommentId())
+                .message(    saved.getMessage()         )
+                .isRead(     saved.isRead()             )
                 .build();
-
-        notificationRepository.save(notification);
-
-        NotificationDto dto = new NotificationDto();
-        dto.setNoticeId(notification.getNoticeId());
-        dto.setUserId(user.getUserId());
-        dto.setThreadId(thread.getThreadId());
-        dto.setCommentId(commentId);
-        dto.setMessage(message);
-        dto.setRead(false);
-        dto.setCreateDate(notification.getCreateDate());
-
-        return dto;
     }
 
-    public List<NotificationDto> getUserNotifications(Long userId) {
-        List<Notification> notifications =
-                notificationRepository.findByUserUserIdOrderByCreateDateDesc(userId);
+    /**
+     * 개별 알림 조회
+     */
+    @Transactional(readOnly = true)
+    public Notification findById(Long noticeId) {
+        return notificationRepository.findById(noticeId)
+                .orElseThrow(() -> new RuntimeException("해당 알림이 없습니다."));
+    }
 
-        return notifications.stream()
-                .map(n -> {
-                    NotificationDto dto = new NotificationDto();
-                    dto.setNoticeId(n.getNoticeId());
-                    dto.setUserId(n.getUser().getUserId());
-                    dto.setThreadId(n.getThread().getThreadId());
-                    dto.setCommentId(n.getComment().getCommentId());
-                    dto.setMessage(n.getMessage());
-                    dto.setRead(n.isRead());
-                    dto.setCreateDate(n.getCreateDate());
-                    return dto;
-                })
-                .collect(Collectors.toList());
+    /**
+     * 특정 유저의 알림 리스트 조회 (최신 순)
+     */
+    @Transactional(readOnly = true)
+    public List<Notification> getUserNotifications(Long userId) {
+        return notificationRepository
+                .findByUserUserIdOrderByCreateDateDesc(userId);
     }
 }

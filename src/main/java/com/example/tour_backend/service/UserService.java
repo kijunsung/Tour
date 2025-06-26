@@ -4,11 +4,9 @@ package com.example.tour_backend.service;
 import com.example.tour_backend.config.JwtTokenProvider;
 import com.example.tour_backend.domain.user.User;
 import com.example.tour_backend.domain.user.UserRepository;
-import com.example.tour_backend.dto.user.JwtResponse;
-import com.example.tour_backend.dto.user.LoginRequestDto;
-import com.example.tour_backend.dto.user.UserRequestDto;
-import com.example.tour_backend.dto.user.UserResponseDto;
+import com.example.tour_backend.dto.user.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -76,6 +74,22 @@ public class UserService {
         dto.setModifiedDate(user.getModifiedDate());
         return dto;
     }
+    // 회원정보 수정 추가
+    @Transactional
+    public UserResponseDto updateUser(Long userId, UserUpdateRequestDto request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        user.setName(request.getName());
+        user.setNickname(request.getNickname());
+        user.setEmail(request.getEmail());
+        user.setPhone(request.getPhone());
+
+        userRepository.save(user);
+
+        return new UserResponseDto(user);
+    }
+
     // 회원 조회
     public Optional<UserResponseDto> getUser(Long userId) {
         return userRepository.findById(userId)
@@ -109,4 +123,11 @@ public class UserService {
                 })
                 .collect(Collectors.toList());
     }
+
+    public Long findUserIdByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+        return user.getUserId();
+    }
+
 }
