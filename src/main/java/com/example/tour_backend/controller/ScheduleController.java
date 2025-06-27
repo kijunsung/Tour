@@ -9,6 +9,7 @@ import com.example.tour_backend.service.ScheduleService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -32,6 +33,13 @@ public class ScheduleController {
     public Schedule getById(@PathVariable Long id) {
         return scheduleRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Schedule not found"));
+    }
+
+    @GetMapping("/{Id}")
+    public ResponseEntity<ScheduleDto> getSchedule(@PathVariable Long scheduleId) {
+        return scheduleService.getSchedule(scheduleId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
@@ -72,4 +80,7 @@ public class ScheduleController {
     public void delete(@PathVariable Long id) {
         scheduleRepository.deleteById(id);
     }
+
+
+
 }

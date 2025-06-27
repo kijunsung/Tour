@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class MapService {
+
     private final MapRepository mapRepository;
     private final ScheduleRepository scheduleRepository;
 
@@ -39,7 +40,9 @@ public class MapService {
     }
 
 
-
+    /**
+     * 단건 Map 조회 (GET /maps/{mapId})
+     */
     public Optional<MapDto> getMap(Long mapId) {
         return mapRepository.findById(mapId)
                 .map(m -> MapDto.builder()
@@ -51,6 +54,9 @@ public class MapService {
                 );
     }
 
+    /**
+     * 전체 Map 조회 (optional)
+     */
     public List<MapDto> getAllMaps() {
         return mapRepository.findAll().stream()
                 .map(m -> MapDto.builder()
