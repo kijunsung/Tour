@@ -39,7 +39,7 @@ public class User {
     @Column(length = 20)
     private String phone;
 
-    @Column//(nullable = false, unique = true)
+    @Column(nullable = false, unique = true)
     private String nickname;
 
     @CreationTimestamp

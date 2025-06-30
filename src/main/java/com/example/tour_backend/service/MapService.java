@@ -54,6 +54,17 @@ public class MapService {
                 );
     }
 
+//    public Optional<MapDto> getMapTourId(Long tour) {
+//        return mapRepository.findById(tour)
+//                .map(m -> MapDto.builder()
+//                        .mapId(m.getMapId())
+//                        .scheduleId(m.getSchedule().getScheduleId())
+//                        .location(m.getLocation())
+//                        .createDate(m.getCreateDate())
+//                        .build()
+//                );
+//    }
+
     /**
      * 전체 Map 조회 (optional)
      */

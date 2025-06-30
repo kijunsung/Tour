@@ -4,6 +4,7 @@ import com.example.tour_backend.domain.tour.Tour;
 import com.example.tour_backend.domain.tour.TourRepository;
 import com.example.tour_backend.domain.user.User;
 import com.example.tour_backend.domain.user.UserRepository;
+import com.example.tour_backend.dto.map.MapDto;
 import com.example.tour_backend.dto.tour.TourDto;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -60,6 +61,8 @@ public class TourService {
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
+
+
 
     /**
      * 4) 수정

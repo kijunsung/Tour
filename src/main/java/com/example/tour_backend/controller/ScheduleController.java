@@ -9,12 +9,12 @@ import com.example.tour_backend.service.ScheduleService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Timestamp;
 import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/schedules")
@@ -35,12 +35,6 @@ public class ScheduleController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Schedule not found"));
     }
 
-    @GetMapping("/{Id}")
-    public ResponseEntity<ScheduleDto> getSchedule(@PathVariable Long scheduleId) {
-        return scheduleService.getSchedule(scheduleId)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

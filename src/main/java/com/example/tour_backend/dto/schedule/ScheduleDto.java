@@ -1,10 +1,12 @@
 package com.example.tour_backend.dto.schedule;
 
 import lombok.*;
+import org.springframework.http.ResponseEntity;
 
 import java.sql.Date;
 import java.sql.Time;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @NoArgsConstructor
 @Getter
@@ -33,4 +35,5 @@ public class ScheduleDto {
         this.createDate = createDate;
         this.modifiedDate=modifiedDate;
     }
+
 }

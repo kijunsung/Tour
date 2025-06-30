@@ -22,12 +22,16 @@ public class ThreadController {
         return ResponseEntity.ok(created);
     }
 
-    @GetMapping("/{id}") //특정 게시글 조회
+    @GetMapping("/{id}") //특정 게시글 조회(조회수 증가 포함) 수정함
     public ResponseEntity<ThreadDto> getThread(@PathVariable Long id) {
-        return threadService.getThread(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        try {
+            ThreadDto threadDto = threadService.getThreadDetail(id);  // 조회수 증가 로직 포함된 메서드
+            return ResponseEntity.ok(threadDto);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
+
     @GetMapping //모든 게시글 목록 조회
     public ResponseEntity<List<ThreadDto>> getAllThreads() {
         List<ThreadDto> threads = threadService.getAllThreads();
@@ -65,11 +69,23 @@ public class ThreadController {
         return ResponseEntity.ok(responseDto);
     }
 
-    @GetMapping("/search") // 게시글 검색 기능 추추추추가
-    public ResponseEntity<List<ThreadDto>> searchThreads(@RequestParam String keyword) {
-        List<ThreadDto> results = threadService.searchThreads(keyword);
+    @GetMapping("/search") // 게시글 검색 기능 (수정함) 추추추추가
+    public ResponseEntity<List<ThreadDto>> searchThreads(@RequestParam String keyword,
+                                                         @RequestParam String searchType,
+                                                         @RequestParam(required = false, defaultValue = "createDate") String sortBy) {
+
+
+        List<ThreadDto> results = threadService.searchThreads(keyword, searchType, sortBy);
         return ResponseEntity.ok(results);
     }
 
-
+    @PostMapping("/{id}/like") // 좋아요 기능 추가 (수정함)
+    public ResponseEntity<ThreadDto> likeThread(@PathVariable Long id, @RequestParam Long userId) {
+        try {
+            ThreadDto updated = threadService.toggleLike(id, userId);
+            return ResponseEntity.ok(updated);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }
